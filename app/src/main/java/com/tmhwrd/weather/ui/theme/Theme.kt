@@ -7,23 +7,24 @@ import androidx.compose.material.Shapes
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 private val DarkColorPalette = darkColors(
-    primary = Pink400,
-    primaryVariant = Pink950,
+    primary = MRed,
+    primaryVariant = MRed,
     onPrimary = Black,
-    secondary = Purple400,
-    secondaryVariant = Purple400,
+    secondary = MRed,
+    secondaryVariant = MRed,
     onSecondary = Black
 )
 
 private val LightColorPalette = lightColors(
-    primary = Pink600,
-    primaryVariant = Pink950,
+    primary = MRed,
+    primaryVariant = MRed,
     onPrimary = White,
-    secondary = Purple400,
-    secondaryVariant = Purple700,
+    secondary = Color.DarkGray,
+    secondaryVariant = Color.DarkGray,
     onSecondary = Black
 )
 
@@ -43,7 +44,7 @@ fun WeatherTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
     MaterialTheme(
         colors = colors,
         typography = Typography,
-        shapes = shapes,
+//        shapes = shapes,
         content = content
     )
 }
