@@ -1,32 +1,34 @@
 package com.tmhwrd.weather
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
-enum class WeatherScreen() {
-    Start,
-    Capitols,
-    FiveDay,
-//    Search
+enum class WeatherScreen(@StringRes val title: Int)  {
+    Capitols(title = R.string.select_your_city),
+    FiveDay(title = R.string.five_day),
 }
 
 @Composable
 fun AppBar(
+    currentScreen: WeatherScreen,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
-        title = { Text(stringResource(id = R.string.app_name)) },
+        title = { Text(stringResource(id = currentScreen.title)) },
         modifier = modifier,
         navigationIcon = {
             if (canNavigateBack) {
@@ -44,12 +46,17 @@ fun AppBar(
 @Composable
 fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = viewModel()) {
     val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentScreen = WeatherScreen.valueOf(
+        backStackEntry?.destination?.route ?: WeatherScreen.Capitols.name
+    )
 
     Scaffold(
         topBar = {
             AppBar(
-                canNavigateBack = false,
-                navigateUp = { /* TODO: implement back navigation */ }
+                currentScreen = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null,
+                navigateUp = { navController.navigateUp() }
             )
         }
     ) { innerPadding ->
@@ -79,8 +86,8 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = view
                     "NY",
                     "58°F",
                     "58°↑,  58°↓",
-                    "0\"",
-                    "Updated 12:33 PM"
+                    "2\"",
+                    "Updated 12:43 PM"
                 )
             }
         }
