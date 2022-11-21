@@ -1,4 +1,4 @@
-package com.tmhwrd.weather.dataclasses
+package com.tmhwrd.weather.domain
 
 data class CityForecast(
     val city: String,
@@ -7,5 +7,6 @@ data class CityForecast(
     val hiLo: String,
     val precipitation: String,
     val timeUpdated: String,
-    val fiveDay: String = ""
+    val fiveDay: String = "",
+    val thumbnail: String = ""
 )

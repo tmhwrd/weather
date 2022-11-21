@@ -14,10 +14,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.tmhwrd.weather.dataclasses.CityForecast
+import com.tmhwrd.weather.domain.CityForecast
+import com.tmhwrd.weather.network.CurrentConditions
+import com.tmhwrd.weather.network.WeatherNetwork
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 enum class WeatherScreen(@StringRes val title: Int) {
-    Capitols(title = R.string.select_your_city),
+    Capitals(title = R.string.select_your_city),
     FiveDay(title = R.string.five_day),
 }
 
@@ -49,7 +54,7 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = view
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = WeatherScreen.valueOf(
-        backStackEntry?.destination?.route ?: WeatherScreen.Capitols.name
+        backStackEntry?.destination?.route ?: WeatherScreen.Capitals.name
     )
 
     Scaffold(
@@ -61,15 +66,13 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = view
             )
         }
     ) { innerPadding ->
-//        val uiState by viewModel.uiState.collectAsState()
-
         NavHost(
             navController = navController,
-            startDestination = WeatherScreen.Capitols.name,
+            startDestination = WeatherScreen.Capitals.name,
             modifier = modifier.padding(innerPadding)
         ) {
-            composable(route = WeatherScreen.Capitols.name) {
-                CapitolCitiesScreen(modifier,
+            composable(route = WeatherScreen.Capitals.name) {
+                CapitalCitiesScreen(modifier,
                     listOf(
                         CityForecast(
                             "Boston",
@@ -117,7 +120,7 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = view
                     })
             }
             composable(route = WeatherScreen.FiveDay.name) {
-                CapitolCitiesScreen(
+                CapitalCitiesScreen(
                     modifier,
                     listOf(
                         CityForecast(
