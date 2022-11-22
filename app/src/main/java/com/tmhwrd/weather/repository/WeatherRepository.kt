@@ -1,16 +1,17 @@
 package com.tmhwrd.weather.repository
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.tmhwrd.weather.BuildConfig
 import com.tmhwrd.weather.db.ForecastDatabase
-import com.tmhwrd.weather.network.CurrentConditions
-import com.tmhwrd.weather.network.Forecast
-import com.tmhwrd.weather.network.WeatherNetwork
+import com.tmhwrd.weather.network.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
 class WeatherRepository(private val database: ForecastDatabase) {
+    val forecasts: MutableLiveData<List<UiForecast>> = MutableLiveData(emptyList())
+
     private val allStateCapitals: List<Pair<String, Int>> = listOf(
         "Albany, New York" to 329673,
         "Annapolis, Maryland" to 329302,
@@ -65,7 +66,6 @@ class WeatherRepository(private val database: ForecastDatabase) {
     )
 
     suspend fun fetchForecasts(): List<Forecast> {
-        return emptyList()
         val forecasts = mutableListOf<Forecast>()
         allStateCapitals.forEach { capital ->
             withContext(Dispatchers.IO) {
@@ -92,6 +92,7 @@ class WeatherRepository(private val database: ForecastDatabase) {
                 )
             }
         }
+        this.forecasts.postValue(forecasts.toDomainObjects())
         return forecasts
     }
 }

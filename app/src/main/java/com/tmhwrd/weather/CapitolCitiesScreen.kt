@@ -6,12 +6,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tmhwrd.weather.domain.CityForecast
+import com.tmhwrd.weather.network.UiForecast
 import com.tmhwrd.weather.ui.theme.WeatherTheme
 import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
@@ -21,8 +24,9 @@ fun CapitalCitiesScreen(
     viewModel: WeatherViewModel = viewModel(),
     onNextButtonClicked: () -> Unit = {}
 ) {
+    val forecasts by viewModel.forecasts.observeAsState()
     LazyColumn {
-        items(viewModel.uiState.cityForecasts) { forecast ->
+        items(forecasts ?: emptyList()) { forecast ->
             CapitalCityView(modifier, forecast, onNextButtonClicked)
         }
     }
@@ -30,7 +34,7 @@ fun CapitalCitiesScreen(
 
 @Composable
 fun CapitalCityView(
-    modifier: Modifier, forecast: CityForecast, onNextButtonClicked: () -> Unit = {}
+    modifier: Modifier, forecast: UiForecast, onNextButtonClicked: () -> Unit = {}
 ) {
     Row(modifier = Modifier.padding(24.dp)) {
         DailyForecastCell(

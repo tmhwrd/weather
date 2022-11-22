@@ -73,12 +73,12 @@ fun List<Forecast>.toDomainObjects(): List<UiForecast> {
 }
 
 val SystemSpecificTemperature.displayString: String get() = "$Value°F"
-val TimePeriod.precipitationText: String get() = if (HasPrecipitation == true) "$PrecipitationIntensity $PrecipitationType" else "Precipitation: None"
+val TimePeriod.precipitationText: String get() = if (HasPrecipitation == true) "${PrecipitationIntensity?: ""} ${PrecipitationType?: ""}" else "No Precipitation"
 fun Forecast.toUiObject(): UiForecast {
     val temp = "${currentConditions.Temperature?.Imperial?.displayString}"
     val forecast = fiveDayForecast.DailyForecasts.firstOrNull()
     val precipitation =
-        if (currentConditions.HasPrecipitation == true) "${currentConditions.PrecipitationIntensity} ${currentConditions.PrecipitationType}" else "Precipitation: None"
+        if (currentConditions.HasPrecipitation == true) "${currentConditions.PrecipitationIntensity?: ""} ${currentConditions.PrecipitationType ?: ""}" else "No Precipitation"
     val hiLo = forecast?.Temperature?.let {
         "${it.Maximum?.displayString}↑,  ${it.Minimum?.displayString}↓"
     } ?: ""

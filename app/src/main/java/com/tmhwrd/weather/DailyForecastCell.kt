@@ -10,10 +10,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.size.Size
 import com.tmhwrd.weather.domain.CityForecast
+import com.tmhwrd.weather.network.UiForecast
 
 
 @Composable
@@ -32,6 +31,30 @@ fun DailyForecastCell(
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data("https://developer.accuweather.com/sites/default/files/${forecast.iconId}-s.png")
+            .crossfade(true)
+            .build(),
+        contentDescription = null,
+        modifier = Modifier.requiredSize(72.dp),
+        contentScale = ContentScale.Fit
+    )
+}
+
+@Composable
+fun DailyForecastCell(
+    modifier: Modifier,
+    forecast: UiForecast,
+) {
+    Row(modifier) {
+        Column {
+            Text("${forecast.location}, ${forecast.temp}")
+            Text(forecast.hiLo)
+            Text("${forecast.current.precipitationText} ")
+            Text("${forecast.timeStamp}")
+        }
+    }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data("https://developer.accuweather.com/sites/default/files/${forecast.current.iconId}-s.png")
             .crossfade(true)
             .build(),
         contentDescription = null,
