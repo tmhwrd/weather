@@ -11,3 +11,7 @@ data class CityForecast(
     val thumbnail: String = "",
     val iconId: String = "01"
 )
+
+
+
+

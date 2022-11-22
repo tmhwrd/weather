@@ -3,6 +3,8 @@ package com.tmhwrd.weather.repository
 import android.util.Log
 import com.tmhwrd.weather.BuildConfig
 import com.tmhwrd.weather.db.ForecastDatabase
+import com.tmhwrd.weather.network.CurrentConditions
+import com.tmhwrd.weather.network.Forecast
 import com.tmhwrd.weather.network.WeatherNetwork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -61,9 +63,11 @@ class WeatherRepository(private val database: ForecastDatabase) {
 //        "Topeka, Kansas" to 328851,
 //        "Trenton, New Jersey" to 329551,
     )
-    
-    suspend fun fetchForecasts() {
-        allStateCapitals.map { capital ->
+
+    suspend fun fetchForecasts(): List<Forecast> {
+        return emptyList()
+        val forecasts = mutableListOf<Forecast>()
+        allStateCapitals.forEach { capital ->
             withContext(Dispatchers.IO) {
                 val conditionsCall = async {
                     WeatherNetwork.service.getCurrentConditions(
@@ -78,7 +82,16 @@ class WeatherRepository(private val database: ForecastDatabase) {
                 val currentConditions = conditionsCall.await()
                 val fiveDayForecast = fiveDayCall.await()
                 Log.d("abcde", "${capital.second}")
+                forecasts.add(
+                    Forecast(
+                        System.currentTimeMillis(),
+                        capital.first,
+                        currentConditions.firstOrNull() ?: CurrentConditions(),
+                        fiveDayForecast
+                    )
+                )
             }
         }
+        return forecasts
     }
 }
