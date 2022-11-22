@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tmhwrd.weather.domain.CityForecast
+import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 enum class WeatherScreen(@StringRes val title: Int) {
     Capitals(title = R.string.select_your_city), FiveDay(title = R.string.five_day),
@@ -61,19 +62,7 @@ fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = view
             modifier = modifier.padding(innerPadding)
         ) {
             composable(route = WeatherScreen.Capitals.name) {
-                CapitalCitiesScreen(modifier, listOf(
-                    CityForecast(
-                        "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                    ), CityForecast(
-                        "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                    ), CityForecast(
-                        "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                    ), CityForecast(
-                        "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                    ), CityForecast(
-                        "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                    )
-                ), onNextButtonClicked = {
+                CapitalCitiesScreen(modifier, onNextButtonClicked = {
                     navController.navigate(WeatherScreen.FiveDay.name)
                 })
             }

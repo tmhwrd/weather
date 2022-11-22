@@ -8,5 +8,6 @@ data class CityForecast(
     val precipitation: String,
     val timeUpdated: String,
     val fiveDay: String = "",
-    val thumbnail: String = ""
+    val thumbnail: String = "",
+    val iconId: String = "01"
 )

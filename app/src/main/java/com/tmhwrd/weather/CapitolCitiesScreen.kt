@@ -10,15 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tmhwrd.weather.domain.CityForecast
 import com.tmhwrd.weather.ui.theme.WeatherTheme
+import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 @Composable
 fun CapitalCitiesScreen(
-    modifier: Modifier, forecasts: List<CityForecast>, onNextButtonClicked: () -> Unit = {}
+    modifier: Modifier,
+    viewModel: WeatherViewModel = viewModel(),
+    onNextButtonClicked: () -> Unit = {}
 ) {
     LazyColumn {
-        items(forecasts) { forecast ->
+        items(viewModel.uiState.cityForecasts) { forecast ->
             CapitalCityView(modifier, forecast, onNextButtonClicked)
         }
     }
@@ -32,12 +36,11 @@ fun CapitalCityView(
         DailyForecastCell(
             modifier = Modifier.weight(1f), forecast
         )
-        Spacer(Modifier.weight(.5f))
+        Spacer(Modifier.weight(.2f))
         Button(
-            onClick = onNextButtonClicked, modifier = modifier.widthIn(min = 125.dp)
+            onClick = onNextButtonClicked, modifier
         ) {
             Text(stringResource(R.string.five_day))
-
         }
     }
 }
@@ -46,12 +49,8 @@ fun CapitalCityView(
 @Composable
 fun DefaultPreview() {
     WeatherTheme {
-        CapitalCitiesScreen(
-            Modifier, listOf(
-                CityForecast(
-                    "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                )
-            )
+        CityForecast(
+            "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
         )
     }
 }
