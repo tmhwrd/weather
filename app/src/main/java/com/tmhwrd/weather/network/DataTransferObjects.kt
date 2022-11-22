@@ -1,5 +1,7 @@
 package com.tmhwrd.weather.network
 
+import java.text.SimpleDateFormat
+
 data class FiveDayForecast(
     var Headline: Headline? = Headline(),
     var DailyForecasts: ArrayList<DailyForecasts> = arrayListOf()
@@ -71,9 +73,11 @@ fun List<Forecast>.toDomainObjects(): List<UiForecast> {
         it.toUiObject()
     }
 }
-
+val Long.toHumanReadableDT: String get() = SimpleDateFormat("hh:mm:ssZ MM/dd/yy").format(this)
 val SystemSpecificTemperature.displayString: String get() = "$Value°F"
 val TimePeriod.precipitationText: String get() = if (HasPrecipitation == true) "${PrecipitationIntensity?: ""} ${PrecipitationType?: ""}" else "No Precipitation"
+val TimePeriod?.iconIdentifier: String get() = this?.Icon?.paddedTwoDigits ?: "01"
+val Int?.paddedTwoDigits: String get() = toString().padStart(2, '0')
 fun Forecast.toUiObject(): UiForecast {
     val temp = "${currentConditions.Temperature?.Imperial?.displayString}"
     val forecast = fiveDayForecast.DailyForecasts.firstOrNull()
@@ -82,19 +86,19 @@ fun Forecast.toUiObject(): UiForecast {
     val hiLo = forecast?.Temperature?.let {
         "${it.Maximum?.displayString}↑,  ${it.Minimum?.displayString}↓"
     } ?: ""
-    val currentDay = Period(currentConditions.WeatherIcon ?: 1, currentConditions.WeatherText ?: "", precipitation)
+    val currentDay = Period(currentConditions.WeatherIcon.paddedTwoDigits, currentConditions.WeatherText ?: "", precipitation)
     val fiveDay = mutableListOf<Daily>()
     fiveDayForecast.DailyForecasts.forEach {
-        val day = Period( it.Day?.Icon ?: 0, it.Day?.IconPhrase ?: "", it.Day?.precipitationText ?: "")
-        val night = Period(it.Night?.Icon ?: 0, it.Night?.IconPhrase ?: "", it.Night?.precipitationText ?: "")
+        val day = Period( it.Day?.iconIdentifier ?: "", it.Day?.IconPhrase ?: "", it.Day?.precipitationText ?: "")
+        val night = Period(it.Night?.iconIdentifier ?: "", it.Night?.IconPhrase ?: "", it.Night?.precipitationText ?: "")
         val daily = Daily(it.Date ?: "", day, night)
         fiveDay.add(daily)
     }
-    return UiForecast(timeStamp, hiLo, city, temp, currentDay, fiveDay)
+    return UiForecast(timeStamp.toHumanReadableDT, hiLo, city, temp, currentDay, fiveDay)
 }
 
 data class UiForecast(
-    val timeStamp: Long = System.currentTimeMillis(),
+    val timeStamp: String,
     val hiLo: String,
     val location: String,
     val temp: String,
@@ -103,4 +107,4 @@ data class UiForecast(
 )
 
 data class Daily(val displayDate:String, val day: Period, val night: Period)
-data class Period(val iconId: Int, val text: String, val precipitationText: String)
+data class Period(val iconId: String, val text: String, val precipitationText: String)

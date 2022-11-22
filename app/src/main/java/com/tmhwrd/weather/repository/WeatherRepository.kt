@@ -1,6 +1,5 @@
 package com.tmhwrd.weather.repository
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.tmhwrd.weather.BuildConfig
 import com.tmhwrd.weather.db.ForecastDatabase
@@ -65,7 +64,7 @@ class WeatherRepository(private val database: ForecastDatabase) {
 //        "Trenton, New Jersey" to 329551,
     )
 
-    suspend fun fetchForecasts(): List<Forecast> {
+    suspend fun fetchForecasts() {
         val forecasts = mutableListOf<Forecast>()
         allStateCapitals.forEach { capital ->
             withContext(Dispatchers.IO) {
@@ -81,7 +80,6 @@ class WeatherRepository(private val database: ForecastDatabase) {
                 }
                 val currentConditions = conditionsCall.await()
                 val fiveDayForecast = fiveDayCall.await()
-                Log.d("abcde", "${capital.second}")
                 forecasts.add(
                     Forecast(
                         System.currentTimeMillis(),
@@ -93,6 +91,5 @@ class WeatherRepository(private val database: ForecastDatabase) {
             }
         }
         this.forecasts.postValue(forecasts.toDomainObjects())
-        return forecasts
     }
 }

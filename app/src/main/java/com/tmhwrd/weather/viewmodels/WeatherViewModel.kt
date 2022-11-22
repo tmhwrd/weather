@@ -19,10 +19,9 @@ class WeatherViewModel(application: Application) : AndroidViewModel(application)
     private fun refreshDataFromRepository() {
         viewModelScope.launch {
             try {
-                val forecasts = weatherRepository.fetchForecasts()
-                Log.d("abcde", forecasts.firstOrNull().toString())
+                weatherRepository.fetchForecasts()
             } catch (e: Exception) {
-                Log.d("tmhwrd", e.message ?: "insert classic placeholder here")
+                Log.e("tmhwrd", e.message ?: "")
             }
         }
     }
