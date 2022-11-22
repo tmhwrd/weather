@@ -1,12 +1,8 @@
 package com.tmhwrd.weather.network
 
-data class NetworkForecast(
-    val title: String,
-    val description: String,
-    val url: String,
-    val updated: String,
-    val thumbnail: String,
-    val closedCaptions: String?
+data class FiveDayForecast(
+    var Headline: Headline? = Headline(),
+    var DailyForecasts: ArrayList<DailyForecasts> = arrayListOf()
 )
 
 data class DailyForecasts(
@@ -28,8 +24,6 @@ data class Headline(
     var Category: String? = null,
     var EndDate: String? = null,
     var EndEpochDate: Int? = null,
-    var MobileLink: String? = null,
-    var Link: String? = null
 )
 
 data class TimePeriod(
@@ -47,8 +41,6 @@ data class CurrentConditions(
     var PrecipitationType: String? = null,
     var IsDayTime: Boolean? = null,
     var Temperature: Temperature? = Temperature(),
-    var MobileLink: String? = null,
-    var Link: String? = null
 )
 
 data class SystemSpecificTemperature(

@@ -49,6 +49,7 @@ data class UiState(
 
 class WeatherViewModel(application: Application) : AndroidViewModel(application) {
     private val weatherRepository = WeatherRepository(getDatabase(application))
+
     var uiState by mutableStateOf(UiState())
         private set
 
@@ -59,9 +60,9 @@ class WeatherViewModel(application: Application) : AndroidViewModel(application)
     private fun refreshDataFromRepository() {
         viewModelScope.launch {
             try {
-                weatherRepository.fetchCurrentConditions()
+                weatherRepository.fetchForecasts()
             } catch (e: Exception) {
-                Log.d("tmhwrd", e?.message ?: "insert classic placeholder here")
+                Log.d("tmhwrd", e.message ?: "insert classic placeholder here")
             }
         }
     }
