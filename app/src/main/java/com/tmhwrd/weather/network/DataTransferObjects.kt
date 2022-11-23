@@ -94,7 +94,7 @@ fun Forecast.toUiObject(): UiForecast {
         val daily = Daily(it.Date ?: "", day, night)
         fiveDay.add(daily)
     }
-    return UiForecast(timeStamp.toHumanReadableDT, hiLo, city, temp, currentDay, fiveDay)
+    return UiForecast(timeStamp.toHumanReadableDT, hiLo, city, temp, currentDay, fiveDayForecast.Headline?.Text ?: "Here's your extended forecast...", fiveDay)
 }
 
 data class UiForecast(
@@ -103,6 +103,7 @@ data class UiForecast(
     val location: String,
     val temp: String,
     val current: Period,
+    val fiveDayHeadline: String,
     val fiveDay: List<Daily>,
 )
 

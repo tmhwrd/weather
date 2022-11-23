@@ -4,9 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import com.tmhwrd.weather.BuildConfig
 import com.tmhwrd.weather.db.ForecastDatabase
 import com.tmhwrd.weather.network.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 class WeatherRepository(private val database: ForecastDatabase) {
     val forecasts: MutableLiveData<List<UiForecast>> = MutableLiveData(emptyList())
@@ -21,75 +19,82 @@ class WeatherRepository(private val database: ForecastDatabase) {
         "Bismarck, North Dakota" to 329830,
         "Boise, Idaho" to 328736,
         "Boston, Massachusetts" to 2089587,
-//        "Carson City, Nevada" to 334448,
-//        "Charleston, West Virginia" to 331471,
-//        "Cheyenne, Wyoming" to 331604,
-//        "Columbia, South Carolina" to 330679,
-//        "Columbus, Ohio" to 350128,
-//        "Concord, New Hampshire" to 329508,
-//        "Denver, Colorado" to 2626674,
-//        "Des Moines, Iowa" to 328810,
-//        "Dover, Delaware" to 332276,
-//        "Frankfort, Kentucky" to 328975,
-//        "Harrisburg, Pennsylvania" to 330288,
-//        "Hartford, Connecticut" to 327356,
-//        "Helena, Montana" to 334230,
-//        "Honolulu, Hawaii" to 348211,
-//        "Indianapolis, Indiana" to 2626739,
-//        "Jackson, Mississippi" to 329432,
-//        "Jefferson City, Missouri" to 329435,
-//        "Juneau, Alaska" to 331728,
-//        "Lansing, Michigan" to 329381,
-//        "Lincoln, Nebraska" to 329505,
-//        "Little Rock, Arkansas" to 326862,
-//        "Madison, Wisconsin" to 331530,
-//        "Montgomery, Alabama" to 326706,
-//        "Montpelier, Vermont" to 336167,
-//        "Nashville, Tennessee" to 3592984,
-//        "Oklahoma City, Oklahoma" to 350143,
-//        "Olympia, Washington" to 331418,
-//        "Phoenix, Arizona" to 346935,
-//        "Pierre, South Dakota" to 335569,
-//        "Providence, Rhode Island" to 330414,
-//        "Raleigh,North Carolina" to 329823,
-//        "Richmond, Virginia" to 331252,
-//        "Sacramento, California" to 347627,
-//        "Salem, Oregon" to 330144,
-//        "Salt Lake City, Utah" to 331216,
-//        "Santa Fe, New Mexico" to 329558,
-//        "Springfield, Illinois" to 328763,
-//        "St. Paul, Minnesota" to 3591017,
-//        "Tallahassee, Florida" to 328170,
-//        "Topeka, Kansas" to 328851,
-//        "Trenton, New Jersey" to 329551,
+        "Carson City, Nevada" to 334448,
+        "Charleston, West Virginia" to 331471,
+        "Cheyenne, Wyoming" to 331604,
+        "Columbia, South Carolina" to 330679,
+        "Columbus, Ohio" to 350128,
+        "Concord, New Hampshire" to 329508,
+        "Denver, Colorado" to 2626674,
+        "Des Moines, Iowa" to 328810,
+        "Dover, Delaware" to 332276,
+        "Frankfort, Kentucky" to 328975,
+        "Harrisburg, Pennsylvania" to 330288,
+        "Hartford, Connecticut" to 327356,
+        "Helena, Montana" to 334230,
+        "Honolulu, Hawaii" to 348211,
+        "Indianapolis, Indiana" to 2626739,
+        "Jackson, Mississippi" to 329432,
+        "Jefferson City, Missouri" to 329435,
+        "Juneau, Alaska" to 331728,
+        "Lansing, Michigan" to 329381,
+        "Lincoln, Nebraska" to 329505,
+        "Little Rock, Arkansas" to 326862,
+        "Madison, Wisconsin" to 331530,
+        "Montgomery, Alabama" to 326706,
+        "Montpelier, Vermont" to 336167,
+        "Nashville, Tennessee" to 3592984,
+        "Oklahoma City, Oklahoma" to 350143,
+        "Olympia, Washington" to 331418,
+        "Phoenix, Arizona" to 346935,
+        "Pierre, South Dakota" to 335569,
+        "Providence, Rhode Island" to 330414,
+        "Raleigh,North Carolina" to 329823,
+        "Richmond, Virginia" to 331252,
+        "Sacramento, California" to 347627,
+        "Salem, Oregon" to 330144,
+        "Salt Lake City, Utah" to 331216,
+        "Santa Fe, New Mexico" to 329558,
+        "Springfield, Illinois" to 328763,
+        "St. Paul, Minnesota" to 3591017,
+        "Tallahassee, Florida" to 328170,
+        "Topeka, Kansas" to 328851,
+        "Trenton, New Jersey" to 329551,
     )
 
     suspend fun fetchForecasts() {
-        val forecasts = mutableListOf<Forecast>()
-        allStateCapitals.forEach { capital ->
-            withContext(Dispatchers.IO) {
-                val conditionsCall = async {
-                    WeatherNetwork.service.getCurrentConditions(
-                        capital.second, BuildConfig.API_TOKEN
-                    )
-                }
-                val fiveDayCall = async {
-                    WeatherNetwork.service.getFiveDayForecast(
-                        capital.second, BuildConfig.API_TOKEN
-                    )
-                }
-                val currentConditions = conditionsCall.await()
-                val fiveDayForecast = fiveDayCall.await()
-                forecasts.add(
-                    Forecast(
-                        System.currentTimeMillis(),
-                        capital.first,
-                        currentConditions.firstOrNull() ?: CurrentConditions(),
-                        fiveDayForecast
-                    )
+        var forecasts: List<Forecast?>
+        coroutineScope {
+            forecasts = allStateCapitals.map { async { fetchForecast(it) } }.awaitAll()
+        }
+        this.forecasts.postValue(forecasts.filterNotNull().toDomainObjects())
+    }
+
+    private suspend fun fetchForecast(capital: Pair<String, Int>): Forecast? {
+        var currentConditions: List<CurrentConditions>? = null
+        var fiveDayForecast: FiveDayForecast? = null
+        coroutineScope {
+            val conditionsCall = async {
+                WeatherNetwork.service.getCurrentConditions(
+                    capital.second, BuildConfig.API_TOKEN
                 )
             }
+            val fiveDayCall = async {
+                WeatherNetwork.service.getFiveDayForecast(
+                    capital.second, BuildConfig.API_TOKEN
+                )
+            }
+            currentConditions = conditionsCall.await()
+            fiveDayForecast = fiveDayCall.await()
         }
-        this.forecasts.postValue(forecasts.toDomainObjects())
+
+        return fiveDayForecast?.let {
+            Forecast(
+                System.currentTimeMillis(),
+                capital.first,
+                currentConditions?.firstOrNull() ?: CurrentConditions(),
+                it
+            )
+        }
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tmhwrd.weather.domain.CityForecast
+import com.tmhwrd.weather.network.Period
 import com.tmhwrd.weather.network.UiForecast
 import com.tmhwrd.weather.ui.theme.WeatherTheme
 import com.tmhwrd.weather.viewmodels.WeatherViewModel
@@ -53,8 +54,16 @@ fun CapitalCityView(
 @Composable
 fun DefaultPreview() {
     WeatherTheme {
-        CityForecast(
-            "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
+        CapitalCityView(
+            modifier = Modifier, forecast = UiForecast(
+                "3/16",
+                "30/20",
+                "Boston, MA",
+                "0",
+                Period("01", "Some text", "Some other text"),
+                "Here's your five day...",
+                emptyList()
+            )
         )
     }
 }

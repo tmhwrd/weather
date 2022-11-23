@@ -10,13 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.tmhwrd.weather.domain.CityForecast
-import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 enum class WeatherScreen(@StringRes val title: Int) {
     Capitals(title = R.string.select_your_city), FiveDay(title = R.string.five_day),
@@ -44,7 +42,7 @@ fun AppBar(
 }
 
 @Composable
-fun WeatherApp(modifier: Modifier = Modifier, viewModel: WeatherViewModel = viewModel()) {
+fun WeatherApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = WeatherScreen.valueOf(
