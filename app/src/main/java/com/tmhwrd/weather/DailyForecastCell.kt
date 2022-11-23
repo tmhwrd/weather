@@ -17,7 +17,7 @@ fun DailyForecastCell(
             Text("${forecast.location}, ${forecast.temp}")
             Text(forecast.hiLo)
             Text("${forecast.current.precipitationText} ")
-            Text("${forecast.timeStamp}")
+            Text(forecast.timeStamp)
         }
     }
     IconImage(forecast.current.iconId)

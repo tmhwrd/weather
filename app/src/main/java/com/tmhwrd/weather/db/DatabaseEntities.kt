@@ -2,7 +2,6 @@ package com.tmhwrd.weather.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.tmhwrd.weather.domain.CityForecast
 
 @Entity
 data class DatabaseForecast constructor(
