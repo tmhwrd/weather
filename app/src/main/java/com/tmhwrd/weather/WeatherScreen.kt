@@ -1,6 +1,5 @@
 package com.tmhwrd.weather
 
-import ExtendedForecastScreen
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -14,7 +13,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.tmhwrd.weather.domain.CityForecast
+import com.tmhwrd.weather.viewmodels.WeatherViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 enum class WeatherScreen(@StringRes val title: Int) {
     Capitals(title = R.string.select_your_city), FiveDay(title = R.string.five_day),
@@ -42,7 +42,9 @@ fun AppBar(
 }
 
 @Composable
-fun WeatherApp(modifier: Modifier = Modifier) {
+fun WeatherApp(
+    modifier: Modifier = Modifier, viewModel: WeatherViewModel = viewModel()
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = WeatherScreen.valueOf(
@@ -60,18 +62,12 @@ fun WeatherApp(modifier: Modifier = Modifier) {
             modifier = modifier.padding(innerPadding)
         ) {
             composable(route = WeatherScreen.Capitals.name) {
-                CapitalCitiesScreen(modifier, onNextButtonClicked = {
+                CapitalCitiesScreen(modifier, viewModel, onNextButtonClicked = {
                     navController.navigate(WeatherScreen.FiveDay.name)
                 })
             }
             composable(route = WeatherScreen.FiveDay.name) {
-                ExtendedForecastScreen(
-                    modifier, listOf(
-                        CityForecast(
-                            "Albany", "NY", "58°F", "58°↑,  58°↓", "2\"", "Updated 12:43 PM"
-                        )
-                    )
-                )
+                ExtendedForecastScreen(viewModel)
             }
         }
     }

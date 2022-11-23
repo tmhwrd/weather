@@ -16,17 +16,3 @@ data class DatabaseForecast constructor(
     val fiveDay: String,
     val thumbnail: String
 )
-
-fun List<DatabaseForecast>.asDomainModel(): List<CityForecast> {
-    return map {
-        CityForecast(
-            city = it.city,
-            state = it.state,
-            temp = it.temp,
-            hiLo = it.hiLo,
-            precipitation = it.precipitation,
-            timeUpdated = it.timeUpdated,
-            thumbnail = it.thumbnail
-        )
-    }
-}

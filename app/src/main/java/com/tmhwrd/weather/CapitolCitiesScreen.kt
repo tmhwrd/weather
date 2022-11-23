@@ -10,13 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tmhwrd.weather.domain.CityForecast
-import com.tmhwrd.weather.network.Period
 import com.tmhwrd.weather.network.UiForecast
-import com.tmhwrd.weather.ui.theme.WeatherTheme
 import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 @Composable
@@ -28,7 +24,10 @@ fun CapitalCitiesScreen(
     val forecasts by viewModel.forecasts.observeAsState()
     LazyColumn {
         items(forecasts ?: emptyList()) { forecast ->
-            CapitalCityView(modifier, forecast, onNextButtonClicked)
+            CapitalCityView(modifier, forecast) {
+                viewModel.forecastTapped(forecast)
+                onNextButtonClicked()
+            }
         }
     }
 }
@@ -47,23 +46,5 @@ fun CapitalCityView(
         ) {
             Text(stringResource(R.string.five_day))
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    WeatherTheme {
-        CapitalCityView(
-            modifier = Modifier, forecast = UiForecast(
-                "3/16",
-                "30/20",
-                "Boston, MA",
-                "0",
-                Period("01", "Some text", "Some other text"),
-                "Here's your five day...",
-                emptyList()
-            )
-        )
     }
 }

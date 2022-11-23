@@ -1,47 +1,48 @@
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+package com.tmhwrd.weather
+
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.tmhwrd.weather.DailyForecastCell
-import com.tmhwrd.weather.domain.CityForecast
-import com.tmhwrd.weather.ui.theme.WeatherTheme
+import com.tmhwrd.weather.network.Daily
+import com.tmhwrd.weather.network.Period
+import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 @Composable
-fun ExtendedForecastScreen(
-    modifier: Modifier, forecasts: List<CityForecast>, onNextButtonClicked: () -> Unit = {}
-) {
+fun ExtendedForecastScreen(viewModel: WeatherViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val forecast by viewModel.forecast.observeAsState()
     LazyColumn {
-        items(forecasts) { forecast ->
-            CapitalCityView(modifier, forecast, onNextButtonClicked)
+        items(forecast?.fiveDay ?: emptyList()) { fiveDay ->
+            ExtendedForecastCell(fiveDay)
         }
     }
 }
 
 @Composable
-fun CapitalCityView(
-    modifier: Modifier, forecast: CityForecast, onNextButtonClicked: () -> Unit = {}
-) {
-    Row(modifier = Modifier.padding(24.dp)) {
-        DailyForecastCell(
-            modifier, forecast
-        )
+fun ExtendedForecastCell(daily: Daily) {
+    Column(modifier = Modifier.padding(24.dp)) {
+        Text(text = daily.displayDate)
+        Text(text = daily.hiLo)
+        DayPartCell(isDay = true, period = daily.day)
+        DayPartCell(isDay = false, period = daily.night)
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    WeatherTheme {
-        ExtendedForecastScreen(
-            Modifier, listOf(
-                CityForecast(
-                    "Boston", "MA", "58°F", "58°↑,  58°↓", "0\"", "Updated 12:33 PM"
-                )
-            )
-        )
+fun DayPartCell(isDay: Boolean, period: Period) {
+    Row {
+        Column {
+            Text(text = stringResource(if (isDay) R.string.day else R.string.night))
+            Text(text = period.text)
+            Text(text = period.precipitationText)
+        }
+        Spacer(Modifier.weight(.2f))
+        IconImage(period.iconId)
     }
 }

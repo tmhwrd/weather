@@ -16,7 +16,17 @@ data class DailyForecasts(
     var Sources: List<String> = arrayListOf(),
     var MobileLink: String? = null,
     var Link: String? = null
-)
+) {
+    val displayDate: String
+        get() {
+            Date?.let {
+                val pattern = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                val formatter = SimpleDateFormat("MM-dd-yyyy")
+                return formatter.format(pattern.parse(it))
+            }
+            return "this "
+        }
+}
 
 data class Headline(
     var EffectiveDate: String? = null,
@@ -49,9 +59,7 @@ data class CurrentConditions(
 )
 
 data class SystemSpecificTemperature(
-    var Value: Float? = null,
-    var Unit: String? = null,
-    var UnitType: Int? = null
+    var Value: Float? = null, var Unit: String? = null, var UnitType: Int? = null
 )
 
 data class Temperature(
@@ -68,44 +76,64 @@ data class Forecast(
     val fiveDayForecast: FiveDayForecast
 )
 
-fun List<Forecast>.toDomainObjects(): List<UiForecast> {
-    return map {
-        it.toUiObject()
-    }
-}
+val List<Forecast>.domainObjects get() = map { it.toUiObject() }
+
+
+val Temperature?.hiLo
+    get() = this?.let { "${it.Maximum?.displayString}↑,  ${it.Minimum?.displayString}↓" } ?: ""
 val Long.toHumanReadableDT: String get() = SimpleDateFormat("hh:mm:ssZ MM/dd/yy").format(this)
 val SystemSpecificTemperature.displayString: String get() = "$Value°F"
-val TimePeriod.precipitationText: String get() = if (HasPrecipitation == true) "${PrecipitationIntensity?: ""} ${PrecipitationType?: ""}" else "No Precipitation"
+val TimePeriod.precipitationText: String get() = if (HasPrecipitation == true) "${PrecipitationIntensity ?: ""} ${PrecipitationType ?: ""}" else "No Precipitation"
 val TimePeriod?.iconIdentifier: String get() = this?.Icon?.paddedTwoDigits ?: "01"
 val Int?.paddedTwoDigits: String get() = toString().padStart(2, '0')
 fun Forecast.toUiObject(): UiForecast {
     val temp = "${currentConditions.Temperature?.Imperial?.displayString}"
     val forecast = fiveDayForecast.DailyForecasts.firstOrNull()
     val precipitation =
-        if (currentConditions.HasPrecipitation == true) "${currentConditions.PrecipitationIntensity?: ""} ${currentConditions.PrecipitationType ?: ""}" else "No Precipitation"
-    val hiLo = forecast?.Temperature?.let {
-        "${it.Maximum?.displayString}↑,  ${it.Minimum?.displayString}↓"
-    } ?: ""
-    val currentDay = Period(currentConditions.WeatherIcon.paddedTwoDigits, currentConditions.WeatherText ?: "", precipitation)
+        if (currentConditions.HasPrecipitation == true) "${currentConditions.PrecipitationIntensity ?: ""} ${currentConditions.PrecipitationType ?: ""}" else "No Precipitation"
+    val currentDay = Period(
+        currentConditions.WeatherIcon.paddedTwoDigits,
+        currentConditions.WeatherText ?: "",
+        precipitation
+    )
     val fiveDay = mutableListOf<Daily>()
     fiveDayForecast.DailyForecasts.forEach {
-        val day = Period( it.Day?.iconIdentifier ?: "", it.Day?.IconPhrase ?: "", it.Day?.precipitationText ?: "")
-        val night = Period(it.Night?.iconIdentifier ?: "", it.Night?.IconPhrase ?: "", it.Night?.precipitationText ?: "")
-        val daily = Daily(it.Date ?: "", day, night)
+        val day = it.Day.toUiPeriod
+        val night = it.Night.toUiPeriod
+        val daily = Daily(it.Temperature.hiLo, it.displayDate, day, night)
         fiveDay.add(daily)
     }
-    return UiForecast(timeStamp.toHumanReadableDT, hiLo, city, temp, currentDay, fiveDayForecast.Headline?.Text ?: "Here's your extended forecast...", fiveDay)
+    return UiForecast(
+        timeStamp.toHumanReadableDT,
+        forecast?.Temperature.hiLo,
+        city,
+        temp,
+        currentDay,
+        fiveDayForecast.Headline?.Text ?: "Here's your extended forecast...",
+        fiveDay
+    )
 }
 
+val TimePeriod?.toUiPeriod
+    get() = this?.let {
+        Period(
+            iconIdentifier,
+            it.IconPhrase ?: "",
+            precipitationText
+        )
+    } ?: Period()
+
 data class UiForecast(
-    val timeStamp: String,
-    val hiLo: String,
-    val location: String,
-    val temp: String,
-    val current: Period,
-    val fiveDayHeadline: String,
-    val fiveDay: List<Daily>,
+    val timeStamp: String = "",
+    val hiLo: String = "",
+    val location: String = "",
+    val temp: String = "",
+    val current: Period = Period(),
+    val fiveDayHeadline: String = "",
+    val fiveDay: List<Daily> = emptyList(),
 )
 
-data class Daily(val displayDate:String, val day: Period, val night: Period)
-data class Period(val iconId: String, val text: String, val precipitationText: String)
+data class Daily(val hiLo: String, val displayDate: String, val day: Period, val night: Period)
+data class Period(
+    val iconId: String = "", val text: String = "", val precipitationText: String = ""
+)
