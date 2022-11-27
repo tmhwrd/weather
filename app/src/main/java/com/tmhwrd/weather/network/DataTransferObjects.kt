@@ -1,25 +1,22 @@
 package com.tmhwrd.weather.network
 
+import com.google.gson.annotations.SerializedName
 import java.text.SimpleDateFormat
 
 data class FiveDayForecast(
-    var Headline: Headline? = Headline(),
-    var DailyForecasts: ArrayList<DailyForecasts> = arrayListOf()
+    @SerializedName("Headline") var headline: Headline? = Headline(),
+    @SerializedName("DailyForecasts") var forecasts: ArrayList<DailyForecast> = arrayListOf()
 )
 
-data class DailyForecasts(
-    var Date: String? = null,
-    var EpochDate: Int? = null,
-    var Temperature: Temperature? = Temperature(),
-    var Day: TimePeriod? = TimePeriod(),
-    var Night: TimePeriod? = TimePeriod(),
-    var Sources: List<String> = arrayListOf(),
-    var MobileLink: String? = null,
-    var Link: String? = null
+data class DailyForecast(
+    @SerializedName("Date") var date: String? = null,
+    @SerializedName("Temperature") var temperature: TemperatureData? = TemperatureData(),
+    @SerializedName("Day") var day: TimePeriod? = TimePeriod(),
+    @SerializedName("Night") var night: TimePeriod? = TimePeriod(),
 ) {
     val displayDate: String
         get() {
-            Date?.let {
+            date?.let {
                 val pattern = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                 val formatter = SimpleDateFormat("MM-dd-yyyy")
                 return formatter.format(pattern.parse(it))
@@ -29,44 +26,49 @@ data class DailyForecasts(
 }
 
 data class Headline(
-    var EffectiveDate: String? = null,
-    var EffectiveEpochDate: Int? = null,
-    var Severity: Int? = null,
-    var Text: String? = null,
-    var Category: String? = null,
-    var EndDate: String? = null,
-    var EndEpochDate: Int? = null,
+    @SerializedName("Text") var Text: String? = null,
 )
+
+abstract class PrecipitationData {
+    abstract var hasPrecipitation: Boolean?
+    abstract var precipitationType: String?
+    abstract var precipitationIntensity: String?
+    val precipitationText: String
+        get() = if (this.hasPrecipitation == true) arrayOf(
+            this.precipitationIntensity,
+            this.precipitationType
+        ).filter { !it.isNullOrEmpty() }.joinToString ( " " ) else "No Precipitation"
+}
 
 data class TimePeriod(
-    var Icon: Int? = null,
-    var IconPhrase: String? = null,
-    var HasPrecipitation: Boolean? = null,
-    var PrecipitationType: String? = null,
-    var PrecipitationIntensity: String? = null
-)
+    @SerializedName("Icon") var iconId: Int? = null,
+    @SerializedName("IconPhrase") var iconText: String? = null,
+    @SerializedName("HasPrecipitation") override var hasPrecipitation: Boolean? = null,
+    @SerializedName("PrecipitationType") override var precipitationType: String? = null,
+    @SerializedName("PrecipitationIntensity") override var precipitationIntensity: String? = null
+) : PrecipitationData()
 
 data class CurrentConditions(
-    var LocalObservationDateTime: String? = null,
-    var EpochTime: Int? = null,
-    var WeatherText: String? = null,
-    var WeatherIcon: Int? = null,
-    var HasPrecipitation: Boolean? = null,
-    var PrecipitationType: String? = null,
-    var PrecipitationIntensity: String? = null,
-    var IsDayTime: Boolean? = null,
-    var Temperature: Temperature? = Temperature(),
-)
-
-data class SystemSpecificTemperature(
-    var Value: Float? = null, var Unit: String? = null, var UnitType: Int? = null
-)
+    @SerializedName("WeatherText") var text: String? = null,
+    @SerializedName("WeatherIcon") var iconId: Int? = null,
+    @SerializedName("HasPrecipitation") override var hasPrecipitation: Boolean? = null,
+    @SerializedName("PrecipitationType") override var precipitationType: String? = null,
+    @SerializedName("PrecipitationIntensity") override var precipitationIntensity: String? = null,
+    @SerializedName("IsDayTime") var isDayTime: Boolean? = null,
+    @SerializedName("Temperature") var temperatureData: TemperatureData? = TemperatureData(),
+) : PrecipitationData()
 
 data class Temperature(
-    var Metric: SystemSpecificTemperature? = SystemSpecificTemperature(),
-    var Imperial: SystemSpecificTemperature? = SystemSpecificTemperature(),
-    var Minimum: SystemSpecificTemperature? = SystemSpecificTemperature(),
-    var Maximum: SystemSpecificTemperature? = SystemSpecificTemperature()
+    @SerializedName("Value") var value: Float? = null,
+    @SerializedName("Unit") var Unit: String? = null,
+    @SerializedName("UnitType") var UnitType: Int? = null
+)
+
+data class TemperatureData(
+    @SerializedName("Metric") var Metric: Temperature? = Temperature(),
+    @SerializedName("Imperial") var Imperial: Temperature? = Temperature(),
+    @SerializedName("Minimum") var Minimum: Temperature? = Temperature(),
+    @SerializedName("Maximum") var Maximum: Temperature? = Temperature()
 )
 
 data class Forecast(
@@ -79,37 +81,34 @@ data class Forecast(
 val List<Forecast>.domainObjects get() = map { it.toUiObject() }
 
 
-val Temperature?.hiLo
+val TemperatureData?.hiLo
     get() = this?.let { "${it.Maximum?.displayString}↑,  ${it.Minimum?.displayString}↓" } ?: ""
 val Long.toHumanReadableDT: String get() = SimpleDateFormat("hh:mm:ssZ MM/dd/yy").format(this)
-val SystemSpecificTemperature.displayString: String get() = "$Value°F"
-val TimePeriod.precipitationText: String get() = if (HasPrecipitation == true) "${PrecipitationIntensity ?: ""} ${PrecipitationType ?: ""}" else "No Precipitation"
-val TimePeriod?.iconIdentifier: String get() = this?.Icon?.paddedTwoDigits ?: "01"
+val Temperature.displayString: String get() = "$value°F"
+val TimePeriod?.iconIdentifier: String get() = this?.iconId?.paddedTwoDigits ?: "01"
 val Int?.paddedTwoDigits: String get() = toString().padStart(2, '0')
 fun Forecast.toUiObject(): UiForecast {
-    val temp = "${currentConditions.Temperature?.Imperial?.displayString}"
-    val forecast = fiveDayForecast.DailyForecasts.firstOrNull()
-    val precipitation =
-        if (currentConditions.HasPrecipitation == true) "${currentConditions.PrecipitationIntensity ?: ""} ${currentConditions.PrecipitationType ?: ""}" else "No Precipitation"
+    val temp = "${currentConditions.temperatureData?.Imperial?.displayString}"
+    val forecast = fiveDayForecast.forecasts.firstOrNull()
     val currentDay = Period(
-        currentConditions.WeatherIcon.paddedTwoDigits,
-        currentConditions.WeatherText ?: "",
-        precipitation
+        currentConditions.iconId.paddedTwoDigits,
+        currentConditions.text ?: "",
+        currentConditions.precipitationText
     )
     val fiveDay = mutableListOf<Daily>()
-    fiveDayForecast.DailyForecasts.forEach {
-        val day = it.Day.toUiPeriod
-        val night = it.Night.toUiPeriod
-        val daily = Daily(it.Temperature.hiLo, it.displayDate, day, night)
+    fiveDayForecast.forecasts.forEach {
+        val day = it.day.toUiPeriod
+        val night = it.night.toUiPeriod
+        val daily = Daily(it.temperature.hiLo, it.displayDate, day, night)
         fiveDay.add(daily)
     }
     return UiForecast(
         timeStamp.toHumanReadableDT,
-        forecast?.Temperature.hiLo,
+        forecast?.temperature.hiLo,
         city,
         temp,
         currentDay,
-        fiveDayForecast.Headline?.Text ?: "Here's your extended forecast...",
+        fiveDayForecast.headline?.Text ?: "Here's your extended forecast...",
         fiveDay
     )
 }
@@ -118,7 +117,7 @@ val TimePeriod?.toUiPeriod
     get() = this?.let {
         Period(
             iconIdentifier,
-            it.IconPhrase ?: "",
+            it.iconText ?: "",
             precipitationText
         )
     } ?: Period()
