@@ -5,10 +5,11 @@ import com.tmhwrd.weather.BuildConfig
 import com.tmhwrd.weather.db.ForecastDatabase
 import com.tmhwrd.weather.network.*
 import kotlinx.coroutines.*
+import java.util.*
 
 class WeatherRepository(private val database: ForecastDatabase) {
-    val forecasts: MutableLiveData<List<UiForecast>> = MutableLiveData(emptyList())
-    val forecast: MutableLiveData<UiForecast> = MutableLiveData(UiForecast())
+    val forecasts: MutableLiveData<List<Forecast>> = MutableLiveData(emptyList())
+    val forecast: MutableLiveData<Forecast> = MutableLiveData(Forecast())
 
     private val allStateCapitals: List<Pair<String, Int>> = listOf(
         "Albany, New York" to 329673,
@@ -65,16 +66,16 @@ class WeatherRepository(private val database: ForecastDatabase) {
 
     suspend fun fetchForecasts() {
         if (forecasts.value?.isEmpty() == false) return
-        var forecasts: List<Forecast?>
+        var forecasts: List<WeatherDTO?>
         coroutineScope {
             forecasts = allStateCapitals.map { async { fetchForecast(it) } }.awaitAll()
         }
         this.forecasts.postValue(forecasts.filterNotNull().domainObjects)
     }
 
-    private suspend fun fetchForecast(capital: Pair<String, Int>): Forecast? {
+    private suspend fun fetchForecast(capital: Pair<String, Int>): WeatherDTO? {
         var currentConditions: List<CurrentConditions>? = null
-        var fiveDayForecast: FiveDayForecast? = null
+        var fiveDay: FiveDay? = null
         coroutineScope {
             val conditionsCall = async {
                 WeatherNetwork.service.getCurrentConditions(
@@ -87,12 +88,12 @@ class WeatherRepository(private val database: ForecastDatabase) {
                 )
             }
             currentConditions = conditionsCall.await()
-            fiveDayForecast = fiveDayCall.await()
+            fiveDay = fiveDayCall.await()
         }
 
-        return fiveDayForecast?.let {
-            Forecast(
-                System.currentTimeMillis(),
+        return fiveDay?.let {
+            WeatherDTO(
+                Date(),
                 capital.first,
                 currentConditions?.firstOrNull() ?: CurrentConditions(),
                 it
@@ -100,5 +101,5 @@ class WeatherRepository(private val database: ForecastDatabase) {
         }
     }
 
-    fun updateForecast(forecast: UiForecast) = this.forecast.postValue(forecast)
+    fun updateForecast(forecast: Forecast) = this.forecast.postValue(forecast)
 }

@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.tmhwrd.weather.db.getDatabase
-import com.tmhwrd.weather.network.UiForecast
+import com.tmhwrd.weather.network.Forecast
 import com.tmhwrd.weather.repository.WeatherRepository
 import kotlinx.coroutines.launch
 
@@ -28,5 +28,5 @@ class WeatherViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun forecastTapped(forecast: UiForecast) = weatherRepository.updateForecast(forecast)
+    fun forecastTapped(forecast: Forecast) = weatherRepository.updateForecast(forecast)
 }

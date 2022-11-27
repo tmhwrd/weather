@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.tmhwrd.weather.network.UiForecast
+import com.tmhwrd.weather.network.Forecast
 
 @Composable
 fun DailyForecastCell(
     modifier: Modifier,
-    forecast: UiForecast,
+    forecast: Forecast,
 ) {
     Row(modifier) {
         Column {
