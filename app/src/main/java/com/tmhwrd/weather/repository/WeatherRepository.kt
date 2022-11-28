@@ -2,6 +2,7 @@ package com.tmhwrd.weather.repository
 
 import androidx.lifecycle.MutableLiveData
 import com.tmhwrd.weather.BuildConfig
+import com.tmhwrd.weather.db.Forecast
 import com.tmhwrd.weather.db.ForecastDatabase
 import com.tmhwrd.weather.network.*
 import kotlinx.coroutines.*
@@ -93,8 +94,8 @@ class WeatherRepository(private val database: ForecastDatabase) {
 
         return fiveDay?.let {
             WeatherDTO(
-                Date(),
                 capital.first,
+                Date(),
                 currentConditions?.firstOrNull() ?: CurrentConditions(),
                 it
             )

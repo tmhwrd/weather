@@ -4,8 +4,8 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.tmhwrd.weather.db.Forecast
 import com.tmhwrd.weather.db.getDatabase
-import com.tmhwrd.weather.network.Forecast
 import com.tmhwrd.weather.repository.WeatherRepository
 import kotlinx.coroutines.launch
 

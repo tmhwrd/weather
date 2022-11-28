@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tmhwrd.weather.network.Forecast
+import com.tmhwrd.weather.db.Forecast
 import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 @Composable

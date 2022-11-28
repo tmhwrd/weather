@@ -10,8 +10,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.tmhwrd.weather.network.Daily
-import com.tmhwrd.weather.network.Period
+import com.tmhwrd.weather.db.Daily
+import com.tmhwrd.weather.db.Period
 import com.tmhwrd.weather.viewmodels.WeatherViewModel
 
 @Composable

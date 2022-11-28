@@ -6,18 +6,17 @@ import androidx.room.*
 
 @Dao
 interface ForecastDao {
-    @Query("select * from databaseforecast")
-    fun getForecast(): LiveData<List<DatabaseForecast>>
+    @Query("select * from forecast")
+    fun getAll(): LiveData<List<Forecast>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll( Forecast: List<DatabaseForecast>)
+    fun insertAll( Forecast: List<Forecast>)
 }
 
-
-
-@Database(entities = [DatabaseForecast::class], version = 1)
+@Database(entities = [Forecast::class], version = 1)
+@TypeConverters(DataConverter::class)
 abstract class ForecastDatabase: RoomDatabase() {
-    abstract val ForecastDao: ForecastDao
+    abstract val forecastDao: ForecastDao
 }
 
 private lateinit var INSTANCE: ForecastDatabase
@@ -27,7 +26,7 @@ fun getDatabase(context: Context): ForecastDatabase {
         if (!::INSTANCE.isInitialized) {
             INSTANCE = Room.databaseBuilder(context.applicationContext,
                 ForecastDatabase::class.java,
-                "Forecast").build()
+                "forecast").build()
         }
     }
     return INSTANCE

@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.tmhwrd.weather.network.Forecast
+import com.tmhwrd.weather.db.Forecast
 
 @Composable
 fun DailyForecastCell(

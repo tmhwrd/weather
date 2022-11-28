@@ -1,6 +1,9 @@
 package com.tmhwrd.weather.network
 
 import com.google.gson.annotations.SerializedName
+import com.tmhwrd.weather.db.Daily
+import com.tmhwrd.weather.db.Forecast
+import com.tmhwrd.weather.db.Period
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -63,14 +66,13 @@ data class TemperatureData(
 )
 
 data class WeatherDTO(
-    val timeStamp: Date,
     val city: String,
+    val timeStamp: Date,
     val currentConditions: CurrentConditions,
     val fiveDay: FiveDay
 )
 
 val List<WeatherDTO>.domainObjects get() = map { it.toAppObject() }
-
 
 val TemperatureData?.hiLo
     get() = this?.let { "${it.Maximum.displayString}↑,  ${it.Minimum.displayString}↓" } ?: ""
@@ -99,9 +101,9 @@ fun WeatherDTO.toAppObject(): Forecast {
         fiveDay.add(daily)
     }
     return Forecast(
+        city,
         timeStamp.displayString,
         forecast?.temperature.hiLo,
-        city,
         currentConditions.temperatureData?.Imperial.displayString,
         currentDay,
         this.fiveDay.headline?.text ?: "Here's your extended forecast...",
@@ -115,18 +117,3 @@ val TimePeriod?.toUiPeriod
             iconIdentifier, it.iconText ?: "", precipitationText
         )
     } ?: Period()
-
-data class Forecast(
-    val timeStamp: String = "",
-    val hiLo: String = "",
-    val location: String = "",
-    val temp: String = "",
-    val current: Period = Period(),
-    val fiveDayHeadline: String = "",
-    val fiveDay: List<Daily> = emptyList(),
-)
-
-data class Daily(val hiLo: String, val displayDate: String, val day: Period, val night: Period)
-data class Period(
-    val iconId: String = "", val text: String = "", val precipitationText: String = ""
-)
