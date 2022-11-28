@@ -6,7 +6,7 @@ import androidx.room.*
 
 @Dao
 interface ForecastDao {
-    @Query("select * from forecast")
+    @Query("SELECT * FROM forecast ORDER BY location ASC")
     fun getAll(): LiveData<List<Forecast>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
